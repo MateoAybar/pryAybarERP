@@ -15,7 +15,7 @@ namespace pryAYbarERP
         public frmPrincipal()
         {
             InitializeComponent();
-            this.Load += FrmPrincipal_Load;
+           
         }
 
         private void FrmPrincipal_Load(object sender, EventArgs e)
@@ -34,5 +34,7 @@ namespace pryAYbarERP
                 MessageBox.Show("No se pudo conectar a la base de datos:\n" + mensaje, "Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+       
     }
 }

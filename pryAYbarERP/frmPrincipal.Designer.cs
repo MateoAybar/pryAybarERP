@@ -37,9 +37,9 @@
             // 
             this.stEstadoConexion.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1});
-            this.stEstadoConexion.Location = new System.Drawing.Point(0, 428);
+            this.stEstadoConexion.Location = new System.Drawing.Point(0, 0);
             this.stEstadoConexion.Name = "stEstadoConexion";
-            this.stEstadoConexion.Size = new System.Drawing.Size(800, 22);
+            this.stEstadoConexion.Size = new System.Drawing.Size(373, 22);
             this.stEstadoConexion.TabIndex = 0;
             this.stEstadoConexion.Text = "statusStrip1";
             // 
@@ -52,11 +52,13 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(373, 22);
             this.Controls.Add(this.stEstadoConexion);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "frmPrincipal";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Main ERP";
+            this.Load += new System.EventHandler(this.FrmPrincipal_Load);
             this.stEstadoConexion.ResumeLayout(false);
             this.stEstadoConexion.PerformLayout();
             this.ResumeLayout(false);
