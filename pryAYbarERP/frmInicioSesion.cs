@@ -27,7 +27,6 @@ namespace pryAYbarERP
 
             if (ok)
             {
-                MessageBox.Show("Bienvenido: " + usuario, "Acceso permitido", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 var frm = new frmPrincipal();
                 frm.Show();
                 this.Hide();
@@ -35,6 +34,7 @@ namespace pryAYbarERP
             else
             {
                 MessageBox.Show(mensaje, "Acceso denegado", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Conexionbd.GrabarAuditoriaSesion(usuario, mensaje);
             }
         }
 

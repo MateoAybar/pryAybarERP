@@ -29,47 +29,61 @@
         private void InitializeComponent()
         {
             this.stEstadoConexion = new System.Windows.Forms.StatusStrip();
-            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.BarraDeEstado = new System.Windows.Forms.ToolStripProgressBar();
+            this.lblConexion = new System.Windows.Forms.Label();
             this.stEstadoConexion.SuspendLayout();
             this.SuspendLayout();
             // 
             // stEstadoConexion
             // 
+            this.stEstadoConexion.AutoSize = false;
             this.stEstadoConexion.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripProgressBar1});
-            this.stEstadoConexion.Location = new System.Drawing.Point(0, 0);
+            this.BarraDeEstado});
+            this.stEstadoConexion.Location = new System.Drawing.Point(0, 509);
             this.stEstadoConexion.Name = "stEstadoConexion";
-            this.stEstadoConexion.Size = new System.Drawing.Size(373, 22);
+            this.stEstadoConexion.Size = new System.Drawing.Size(800, 22);
             this.stEstadoConexion.TabIndex = 0;
             this.stEstadoConexion.Text = "statusStrip1";
+            this.stEstadoConexion.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.stEstadoConexion_ItemClicked);
             // 
-            // toolStripProgressBar1
+            // BarraDeEstado
             // 
-            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
+            this.BarraDeEstado.Name = "BarraDeEstado";
+            this.BarraDeEstado.Size = new System.Drawing.Size(100, 16);
+            // 
+            // lblConexion
+            // 
+            this.lblConexion.AutoSize = true;
+            this.lblConexion.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblConexion.ForeColor = System.Drawing.Color.Green;
+            this.lblConexion.Location = new System.Drawing.Point(12, 485);
+            this.lblConexion.Name = "lblConexion";
+            this.lblConexion.Size = new System.Drawing.Size(0, 13);
+            this.lblConexion.TabIndex = 1;
             // 
             // frmPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(373, 22);
+            this.ClientSize = new System.Drawing.Size(800, 531);
+            this.Controls.Add(this.lblConexion);
             this.Controls.Add(this.stEstadoConexion);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Name = "frmPrincipal";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Main ERP";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "ERP - Sistema de Gestión";
             this.Load += new System.EventHandler(this.FrmPrincipal_Load);
             this.stEstadoConexion.ResumeLayout(false);
             this.stEstadoConexion.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
         private System.Windows.Forms.StatusStrip stEstadoConexion;
-        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
+        private System.Windows.Forms.ToolStripProgressBar BarraDeEstado;
+        private System.Windows.Forms.Label lblConexion;
     }
 }
 

@@ -25,16 +25,21 @@ namespace pryAYbarERP
 
             if (conectado)
             {
-                toolStripProgressBar1.Value = 100;
-                MessageBox.Show("Se conectó correctamente a la base de datos.", "Conexión", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                BarraDeEstado.Value = 100;
+                lblConexion.Text = "✓ Conectado";
+                lblConexion.ForeColor = System.Drawing.Color.Green;
             }
             else
             {
-                toolStripProgressBar1.Value = 0;
-                MessageBox.Show("No se pudo conectar a la base de datos:\n" + mensaje, "Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                BarraDeEstado.Value = 0;
+                lblConexion.Text = "✗ Sin conexión";
+                lblConexion.ForeColor = System.Drawing.Color.Red;
             }
         }
 
-       
+        private void stEstadoConexion_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
     }
 }

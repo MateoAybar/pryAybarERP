@@ -104,15 +104,16 @@ namespace pryAYbarERP.BaseDatos
                 {
                     cn.Open();
 
-                    // Buscar por posibles nombres de campo de usuario/email
-                    string sql = "SELECT * FROM usuario WHERE Usuario = ? OR Mail  = ?";
+                    // Buscar el usuario específico por usuario o email
+                    string sql = "SELECT * FROM usuario WHERE Usuario = ? OR Mail = ?";
                     using (var cmd = new OleDbCommand(sql, cn))
                     {
-                        // Agregar el mismo parámetro repetido (OleDb usa posición)
-                        cmd.Parameters.AddWithValue("@p1", usuarioOEmail);
-                        cmd.Parameters.AddWithValue("@p2", usuarioOEmail);
-                        cmd.Parameters.AddWithValue("@p3", usuarioOEmail);
-                        cmd.Parameters.AddWithValue("@p4", usuarioOEmail);
+                        // Especificar tipo de dato explícitamente
+                        OleDbParameter param1 = cmd.Parameters.Add("@p1", OleDbType.VarChar);
+                        param1.Value = usuarioOEmail;
+
+                        OleDbParameter param2 = cmd.Parameters.Add("@p2", OleDbType.VarChar);
+                        param2.Value = usuarioOEmail;
 
                         using (var adapter = new OleDbDataAdapter(cmd))
                         {
@@ -125,27 +126,31 @@ namespace pryAYbarERP.BaseDatos
                                 return false;
                             }
 
-                            // Posibles nombres de columna para la contraseña
-                            string[] passCols = new[] { "Contraseña"};
+                            // Validar SOLO el primer usuario encontrado
+                            DataRow usuarioEncontrado = dt.Rows[0];
 
-                            foreach (DataRow row in dt.Rows)
+                            // Obtener la contraseña del usuario encontrado
+                            if (dt.Columns.Contains("Contraseña"))
                             {
-                                foreach (var col in passCols)
+                                string contraseñaAlmacenada = usuarioEncontrado["Contraseña"]?.ToString() ?? string.Empty;
+
+                                // Comparar la contraseña ingresada con la del usuario específico
+                                if (contraseñaAlmacenada == contraseña)
                                 {
-                                    if (dt.Columns.Contains(col))
-                                    {
-                                        var val = row[col]?.ToString() ?? string.Empty;
-                                        if (val == contraseña)
-                                        {
-                                            mensaje = "Ingreso correcto.";
-                                            return true;
-                                        }
-                                    }
+                                    mensaje = "Ingreso correcto.";
+                                    return true;
+                                }
+                                else
+                                {
+                                    mensaje = "Contraseña incorrecta.";
+                                    return false;
                                 }
                             }
-
-                            mensaje = "Contraseña incorrecta.";
-                            return false;
+                            else
+                            {
+                                mensaje = "Error: Campo de contraseña no encontrado.";
+                                return false;
+                            }
                         }
                     }
                 }
@@ -154,6 +159,45 @@ namespace pryAYbarERP.BaseDatos
             {
                 mensaje = ex.Message;
                 return false;
+            }
+        }
+
+        // Graba intentos fallidos de inicio de sesión en la tabla AuditoriaSesion
+        public static void GrabarAuditoriaSesion(string usuario, string detalle)
+        {
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+
+                    string fecha = DateTime.Now.ToString("yyyy-MM-dd");
+                    string hora = DateTime.Now.ToString("HH:mm:ss");
+
+                    string sql = "INSERT INTO AuditoriaSesion (Usuario, Detalle, Fecha, Hora) VALUES (?, ?, ?, ?)";
+                    using (var cmd = new OleDbCommand(sql, cn))
+                    {
+                        // Especificar tipo de dato explícitamente
+                        OleDbParameter param1 = cmd.Parameters.Add("@p1", OleDbType.VarChar);
+                        param1.Value = usuario ?? "";
+
+                        OleDbParameter param2 = cmd.Parameters.Add("@p2", OleDbType.VarChar);
+                        param2.Value = detalle ?? "";
+
+                        OleDbParameter param3 = cmd.Parameters.Add("@p3", OleDbType.VarChar);
+                        param3.Value = fecha;
+
+                        OleDbParameter param4 = cmd.Parameters.Add("@p4", OleDbType.VarChar);
+                        param4.Value = hora;
+
+                        int filasInsertadas = cmd.ExecuteNonQuery();
+                        System.Diagnostics.Debug.WriteLine($"[AUDITORÍA] Intento de login fallido registrado: {usuario} - {detalle} ({filasInsertadas} filas)");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ERROR AUDITORÍA] No se pudo grabar intento de login: {ex.Message} | Inner: {ex.InnerException?.Message}");
             }
         }
     }

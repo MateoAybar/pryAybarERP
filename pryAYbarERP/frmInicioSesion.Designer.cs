@@ -64,7 +64,7 @@
             this.lblTitle.ForeColor = System.Drawing.Color.DarkGreen;
             this.lblTitle.Location = new System.Drawing.Point(20, 15);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(212, 30);
+            this.lblTitle.Size = new System.Drawing.Size(239, 30);
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Bienvenido al Sistema";
             // 
@@ -74,7 +74,7 @@
             this.lblUsuario.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblUsuario.Location = new System.Drawing.Point(22, 65);
             this.lblUsuario.Name = "lblUsuario";
-            this.lblUsuario.Size = new System.Drawing.Size(135, 19);
+            this.lblUsuario.Size = new System.Drawing.Size(114, 19);
             this.lblUsuario.TabIndex = 1;
             this.lblUsuario.Text = "Usuario o correo:";
             // 
@@ -92,7 +92,7 @@
             this.lblContrasena.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblContrasena.Location = new System.Drawing.Point(22, 125);
             this.lblContrasena.Name = "lblContrasena";
-            this.lblContrasena.Size = new System.Drawing.Size(81, 19);
+            this.lblContrasena.Size = new System.Drawing.Size(82, 19);
             this.lblContrasena.TabIndex = 3;
             this.lblContrasena.Text = "Contraseña:";
             // 
@@ -111,7 +111,7 @@
             this.chkMostrar.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.chkMostrar.Location = new System.Drawing.Point(25, 178);
             this.chkMostrar.Name = "chkMostrar";
-            this.chkMostrar.Size = new System.Drawing.Size(126, 19);
+            this.chkMostrar.Size = new System.Drawing.Size(128, 19);
             this.chkMostrar.TabIndex = 5;
             this.chkMostrar.Text = "Mostrar contraseña";
             this.chkMostrar.UseVisualStyleBackColor = true;
@@ -137,7 +137,7 @@
             this.lblInfo.ForeColor = System.Drawing.Color.Gray;
             this.lblInfo.Location = new System.Drawing.Point(22, 210);
             this.lblInfo.Name = "lblInfo";
-            this.lblInfo.Size = new System.Drawing.Size(264, 13);
+            this.lblInfo.Size = new System.Drawing.Size(297, 13);
             this.lblInfo.TabIndex = 7;
             this.lblInfo.Text = "Ingresa tu usuario o correo y contraseña para continuar.";
             // 
@@ -153,7 +153,7 @@
             this.MinimizeBox = false;
             this.Name = "frmInicioSesion";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Inicio de sesión";
+            this.Text = "...";
             this.panelMain.ResumeLayout(false);
             this.panelMain.PerformLayout();
             this.ResumeLayout(false);
