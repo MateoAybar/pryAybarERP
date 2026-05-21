@@ -277,6 +277,323 @@ namespace pryAYbarERP.BaseDatos
                 return false;
             }
         }
+
+        // Obtiene todas las provincias registradas
+        public static DataTable ObtenerProvincias(out string mensaje)
+        {
+            mensaje = string.Empty;
+            var dt = new DataTable();
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    string sql = "SELECT Id_Provincia, Nombre FROM Provincia ORDER BY Nombre ASC";
+                    using (var cmd = new OleDbCommand(sql, cn))
+                    {
+                        using (var adapter = new OleDbDataAdapter(cmd))
+                        {
+                            adapter.Fill(dt);
+                        }
+                    }
+                }
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error al obtener provincias: {ex.Message}";
+                return null;
+            }
+        }
+
+        // Obtiene todas las localidades asociadas a una provincia específica
+        public static DataTable ObtenerLocalidades(int idProvincia, out string mensaje)
+        {
+            mensaje = string.Empty;
+            var dt = new DataTable();
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    string sql = "SELECT Id_Localidad, Nombre FROM Localidad WHERE Id_Provincia = ? ORDER BY Nombre ASC";
+                    using (var cmd = new OleDbCommand(sql, cn))
+                    {
+                        cmd.Parameters.AddWithValue("?", idProvincia);
+                        using (var adapter = new OleDbDataAdapter(cmd))
+                        {
+                            adapter.Fill(dt);
+                        }
+                    }
+                }
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error al obtener localidades: {ex.Message}";
+                return null;
+            }
+        }
+
+        // Obtiene los usuarios registrados en el sistema
+        public static DataTable ObtenerUsuarios(out string mensaje)
+        {
+            mensaje = string.Empty;
+            var dt = new DataTable();
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    string sql = "SELECT Id_Usuario, Nombre, Apellido, Mail FROM Usuario ORDER BY Apellido ASC, Nombre ASC";
+                    using (var cmd = new OleDbCommand(sql, cn))
+                    {
+                        using (var adapter = new OleDbDataAdapter(cmd))
+                        {
+                            adapter.Fill(dt);
+                        }
+                    }
+                }
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error al obtener usuarios: {ex.Message}";
+                return null;
+            }
+        }
+
+        // Busca una persona por su DNI
+        public static DataRow BuscarPersonal(string dni, out string mensaje)
+        {
+            mensaje = string.Empty;
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    string sql = "SELECT DNI, Apellido, Nombre FROM Personal WHERE DNI = ?";
+                    using (var cmd = new OleDbCommand(sql, cn))
+                    {
+                        cmd.Parameters.AddWithValue("?", dni);
+                        using (var adapter = new OleDbDataAdapter(cmd))
+                        {
+                            var dt = new DataTable();
+                            adapter.Fill(dt);
+                            if (dt.Rows.Count > 0)
+                                return dt.Rows[0];
+                        }
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error al buscar personal: {ex.Message}";
+                return null;
+            }
+        }
+
+        // Obtiene los domicilios registrados para un DNI con los nombres de provincia y localidad
+        public static DataTable ObtenerDomiciliosPersonal(string dni, out string mensaje)
+        {
+            mensaje = string.Empty;
+            var dt = new DataTable();
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    string sql = "SELECT d.Id_Domicilio, d.DNI_Personal, d.Direccion, d.Id_Provincia, p.Nombre AS Provincia, d.Id_Localidad, l.Nombre AS Localidad " +
+                                 "FROM ((Domicilio d " +
+                                 "LEFT JOIN Provincia p ON d.Id_Provincia = p.Id_Provincia) " +
+                                 "LEFT JOIN Localidad l ON d.Id_Localidad = l.Id_Localidad) " +
+                                 "WHERE d.DNI_Personal = ?";
+                    using (var cmd = new OleDbCommand(sql, cn))
+                    {
+                        cmd.Parameters.AddWithValue("?", dni);
+                        using (var adapter = new OleDbDataAdapter(cmd))
+                        {
+                            adapter.Fill(dt);
+                        }
+                    }
+                }
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error al obtener domicilios: {ex.Message}";
+                return null;
+            }
+        }
+
+        // Guarda o actualiza los datos de una persona y sus domicilios asociados en una transacción
+        public static bool GuardarPersonalConDomicilios(string dni, string apellido, string nombre, DataTable dtDomicilios, out string mensaje)
+        {
+            mensaje = string.Empty;
+            OleDbTransaction transaction = null;
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    transaction = cn.BeginTransaction();
+
+                    // 1. Verificar si Personal existe, si sí, UPDATE, si no, INSERT
+                    string sqlCheck = "SELECT COUNT(*) FROM Personal WHERE DNI = ?";
+                    int existe = 0;
+                    using (var cmdCheck = new OleDbCommand(sqlCheck, cn, transaction))
+                    {
+                        cmdCheck.Parameters.AddWithValue("?", dni);
+                        existe = Convert.ToInt32(cmdCheck.ExecuteScalar());
+                    }
+
+                    if (existe > 0)
+                    {
+                        string sqlUpdate = "UPDATE Personal SET Apellido = ?, Nombre = ? WHERE DNI = ?";
+                        using (var cmdUpdate = new OleDbCommand(sqlUpdate, cn, transaction))
+                        {
+                            cmdUpdate.Parameters.AddWithValue("?", apellido);
+                            cmdUpdate.Parameters.AddWithValue("?", nombre);
+                            cmdUpdate.Parameters.AddWithValue("?", dni);
+                            cmdUpdate.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        string sqlInsert = "INSERT INTO Personal (DNI, Apellido, Nombre) VALUES (?, ?, ?)";
+                        using (var cmdInsert = new OleDbCommand(sqlInsert, cn, transaction))
+                        {
+                            cmdInsert.Parameters.AddWithValue("?", dni);
+                            cmdInsert.Parameters.AddWithValue("?", apellido);
+                            cmdInsert.Parameters.AddWithValue("?", nombre);
+                            cmdInsert.ExecuteNonQuery();
+                        }
+                    }
+
+                    // 2. Eliminar todos los domicilios existentes para este DNI
+                    string sqlDelete = "DELETE FROM Domicilio WHERE DNI_Personal = ?";
+                    using (var cmdDelete = new OleDbCommand(sqlDelete, cn, transaction))
+                    {
+                        cmdDelete.Parameters.AddWithValue("?", dni);
+                        cmdDelete.ExecuteNonQuery();
+                    }
+
+                    // 3. Insertar los nuevos domicilios
+                    string sqlInsertDom = "INSERT INTO Domicilio (DNI_Personal, Direccion, Id_Provincia, Id_Localidad) VALUES (?, ?, ?, ?)";
+                    foreach (DataRow row in dtDomicilios.Rows)
+                    {
+                        using (var cmdInsertDom = new OleDbCommand(sqlInsertDom, cn, transaction))
+                        {
+                            cmdInsertDom.Parameters.AddWithValue("?", dni);
+                            cmdInsertDom.Parameters.AddWithValue("?", row["Direccion"]?.ToString() ?? "");
+                            cmdInsertDom.Parameters.AddWithValue("?", Convert.ToInt32(row["Id_Provincia"]));
+                            cmdInsertDom.Parameters.AddWithValue("?", Convert.ToInt32(row["Id_Localidad"]));
+                            cmdInsertDom.ExecuteNonQuery();
+                        }
+                    }
+
+                    transaction.Commit();
+                    mensaje = "Datos de personal y domicilios guardados correctamente.";
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (transaction != null)
+                {
+                    try { transaction.Rollback(); } catch { }
+                }
+                mensaje = $"Error al guardar datos: {ex.Message}";
+                return false;
+            }
+        }
+
+        // Busca el contacto registrado para un usuario
+        public static DataRow BuscarContactoUsuario(int idUsuario, out string mensaje)
+        {
+            mensaje = string.Empty;
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    string sql = "SELECT Id_Contacto, Id_Usuario, Telefono, RedesSociales, Activo FROM Contacto WHERE Id_Usuario = ?";
+                    using (var cmd = new OleDbCommand(sql, cn))
+                    {
+                        cmd.Parameters.AddWithValue("?", idUsuario);
+                        using (var adapter = new OleDbDataAdapter(cmd))
+                        {
+                            var dt = new DataTable();
+                            adapter.Fill(dt);
+                            if (dt.Rows.Count > 0)
+                                return dt.Rows[0];
+                        }
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error al buscar contacto: {ex.Message}";
+                return null;
+            }
+        }
+
+        // Guarda o actualiza la información de contacto de un usuario
+        public static bool GuardarContactoUsuario(int idUsuario, string telefono, string redesSociales, bool activo, out string mensaje)
+        {
+            mensaje = string.Empty;
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    // Verificar si ya existe
+                    string sqlCheck = "SELECT COUNT(*) FROM Contacto WHERE Id_Usuario = ?";
+                    int existe = 0;
+                    using (var cmdCheck = new OleDbCommand(sqlCheck, cn))
+                    {
+                        cmdCheck.Parameters.AddWithValue("?", idUsuario);
+                        existe = Convert.ToInt32(cmdCheck.ExecuteScalar());
+                    }
+
+                    if (existe > 0)
+                    {
+                        string sqlUpdate = "UPDATE Contacto SET Telefono = ?, RedesSociales = ?, Activo = ? WHERE Id_Usuario = ?";
+                        using (var cmdUpdate = new OleDbCommand(sqlUpdate, cn))
+                        {
+                            cmdUpdate.Parameters.AddWithValue("?", telefono);
+                            cmdUpdate.Parameters.AddWithValue("?", redesSociales);
+                            cmdUpdate.Parameters.AddWithValue("?", activo);
+                            cmdUpdate.Parameters.AddWithValue("?", idUsuario);
+                            cmdUpdate.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        string sqlInsert = "INSERT INTO Contacto (Id_Usuario, Telefono, RedesSociales, Activo) VALUES (?, ?, ?, ?)";
+                        using (var cmdInsert = new OleDbCommand(sqlInsert, cn))
+                        {
+                            cmdInsert.Parameters.AddWithValue("?", idUsuario);
+                            cmdInsert.Parameters.AddWithValue("?", telefono);
+                            cmdInsert.Parameters.AddWithValue("?", redesSociales);
+                            cmdInsert.Parameters.AddWithValue("?", activo);
+                            cmdInsert.ExecuteNonQuery();
+                        }
+                    }
+
+                    mensaje = "Datos de contacto guardados correctamente.";
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error al guardar contacto: {ex.Message}";
+                return false;
+            }
+        }
     }
 }
+
 

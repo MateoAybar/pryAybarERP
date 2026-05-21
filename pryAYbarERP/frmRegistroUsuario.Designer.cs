@@ -70,6 +70,7 @@ namespace pryAYbarERP
             this.panelMain.Name = "panelMain";
             this.panelMain.Size = new System.Drawing.Size(430, 440);
             this.panelMain.TabIndex = 0;
+            this.panelMain.Paint += new System.Windows.Forms.PaintEventHandler(this.panelMain_Paint);
             // 
             // lblTitle
             // 
@@ -78,7 +79,7 @@ namespace pryAYbarERP
             this.lblTitle.ForeColor = System.Drawing.Color.DarkGreen;
             this.lblTitle.Location = new System.Drawing.Point(20, 15);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(252, 30);
+            this.lblTitle.Size = new System.Drawing.Size(216, 30);
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Registro de Usuario";
             // 
@@ -161,7 +162,7 @@ namespace pryAYbarERP
             this.chkMostrar.Font = new System.Drawing.Font("Segoe UI", 8.5F);
             this.chkMostrar.Location = new System.Drawing.Point(20, 275);
             this.chkMostrar.Name = "chkMostrar";
-            this.chkMostrar.Size = new System.Drawing.Size(127, 19);
+            this.chkMostrar.Size = new System.Drawing.Size(128, 19);
             this.chkMostrar.TabIndex = 9;
             this.chkMostrar.Text = "Mostrar contraseña";
             this.chkMostrar.UseVisualStyleBackColor = true;
@@ -173,7 +174,7 @@ namespace pryAYbarERP
             this.lblPerfil.Font = new System.Drawing.Font("Segoe UI", 9.5F);
             this.lblPerfil.Location = new System.Drawing.Point(20, 305);
             this.lblPerfil.Name = "lblPerfil";
-            this.lblPerfil.Size = new System.Drawing.Size(110, 17);
+            this.lblPerfil.Size = new System.Drawing.Size(103, 17);
             this.lblPerfil.TabIndex = 10;
             this.lblPerfil.Text = "Perfil de Cuenta:";
             // 
