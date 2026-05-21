@@ -2,6 +2,7 @@
 using System.Data.OleDb;
 using System.IO;
 using System.Data;
+using System.Windows.Forms;
 
 namespace pryAYbarERP.BaseDatos
 {
@@ -94,7 +95,7 @@ namespace pryAYbarERP.BaseDatos
             return new OleDbConnection(ConnectionString);
         }
 
-        // Valida usuario o email y contraseña contra la tabla 'usuarios' de la BD Access.
+        // Valida usuario o email y contraseña contra la tabla 'Usuario' de la BD Access.
         public static bool ValidarUsuario(string usuarioOEmail, string contraseña, out string mensaje)
         {
             mensaje = string.Empty;
@@ -104,66 +105,56 @@ namespace pryAYbarERP.BaseDatos
                 {
                     cn.Open();
 
-                    // Buscar el usuario específico por usuario o email
-                    string sql = "SELECT * FROM usuario WHERE Usuario = ? OR Mail = ?";
+                    // Cargar todos los usuarios de la tabla
+                    string sql = "SELECT * FROM Usuario";
                     using (var cmd = new OleDbCommand(sql, cn))
                     {
-                        // Especificar tipo de dato explícitamente
-                        OleDbParameter param1 = cmd.Parameters.Add("@p1", OleDbType.VarChar);
-                        param1.Value = usuarioOEmail;
-
-                        OleDbParameter param2 = cmd.Parameters.Add("@p2", OleDbType.VarChar);
-                        param2.Value = usuarioOEmail;
-
                         using (var adapter = new OleDbDataAdapter(cmd))
                         {
                             var dt = new DataTable();
                             adapter.Fill(dt);
 
-                            if (dt.Rows.Count == 0)
+                            // Buscar el usuario en memoria
+                            foreach (DataRow row in dt.Rows)
                             {
-                                mensaje = "Usuario o correo no encontrado.";
-                                return false;
-                            }
+                                string nombreBD = row["Nombre"]?.ToString() ?? "";
+                                string mailBD = row["Mail"]?.ToString() ?? "";
+                                string contraseñaBD = row["Contraseña"]?.ToString() ?? "";
 
-                            // Validar SOLO el primer usuario encontrado
-                            DataRow usuarioEncontrado = dt.Rows[0];
-
-                            // Obtener la contraseña del usuario encontrado
-                            if (dt.Columns.Contains("Contraseña"))
-                            {
-                                string contraseñaAlmacenada = usuarioEncontrado["Contraseña"]?.ToString() ?? string.Empty;
-
-                                // Comparar la contraseña ingresada con la del usuario específico
-                                if (contraseñaAlmacenada == contraseña)
+                                // Comparar por nombre O email (case-insensitive)
+                                if ((nombreBD.Equals(usuarioOEmail, StringComparison.OrdinalIgnoreCase) || 
+                                     mailBD.Equals(usuarioOEmail, StringComparison.OrdinalIgnoreCase)))
                                 {
-                                    mensaje = "Ingreso correcto.";
-                                    return true;
-                                }
-                                else
-                                {
-                                    mensaje = "Contraseña incorrecta.";
-                                    return false;
+                                    // Validar que la contraseña coincida EXACTAMENTE con este usuario
+                                    if (contraseñaBD == contraseña)
+                                    {
+                                        mensaje = "Ingreso correcto.";
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        mensaje = "Contraseña incorrecta.";
+                                        return false;
+                                    }
                                 }
                             }
-                            else
-                            {
-                                mensaje = "Error: Campo de contraseña no encontrado.";
-                                return false;
-                            }
+
+                            // Si no encuentra el usuario
+                            mensaje = "Usuario o correo no encontrado.";
+                            return false;
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                mensaje = ex.Message;
+                mensaje = $"Error: {ex.Message}";
                 return false;
             }
         }
 
         // Graba intentos fallidos de inicio de sesión en la tabla AuditoriaSesion
-        public static void GrabarAuditoriaSesion(string usuario, string detalle)
+        public static void GrabarAuditoriaSesion(string usuario)
         {
             try
             {
@@ -171,33 +162,24 @@ namespace pryAYbarERP.BaseDatos
                 {
                     cn.Open();
 
-                    string fecha = DateTime.Now.ToString("yyyy-MM-dd");
+                    string fecha = DateTime.Now.ToString("dd/MM/yyyy");
                     string hora = DateTime.Now.ToString("HH:mm:ss");
+                    string detalle = "Datos incorrectos";
+                    string usuarioEscapado = (usuario ?? "").Replace("'", "''");
 
-                    string sql = "INSERT INTO AuditoriaSesion (Usuario, Detalle, Fecha, Hora) VALUES (?, ?, ?, ?)";
+                    // SQL INSERT directo
+                    string sql = $"INSERT INTO AuditoriaSesion (Usuario, Detalle, Fecha, Hora) VALUES ('{usuarioEscapado}', '{detalle}', '{fecha}', '{hora}')";
+
                     using (var cmd = new OleDbCommand(sql, cn))
                     {
-                        // Especificar tipo de dato explícitamente
-                        OleDbParameter param1 = cmd.Parameters.Add("@p1", OleDbType.VarChar);
-                        param1.Value = usuario ?? "";
-
-                        OleDbParameter param2 = cmd.Parameters.Add("@p2", OleDbType.VarChar);
-                        param2.Value = detalle ?? "";
-
-                        OleDbParameter param3 = cmd.Parameters.Add("@p3", OleDbType.VarChar);
-                        param3.Value = fecha;
-
-                        OleDbParameter param4 = cmd.Parameters.Add("@p4", OleDbType.VarChar);
-                        param4.Value = hora;
-
-                        int filasInsertadas = cmd.ExecuteNonQuery();
-                        System.Diagnostics.Debug.WriteLine($"[AUDITORÍA] Intento de login fallido registrado: {usuario} - {detalle} ({filasInsertadas} filas)");
+                        cmd.CommandTimeout = 10;
+                        int resultado = cmd.ExecuteNonQuery();
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ERROR AUDITORÍA] No se pudo grabar intento de login: {ex.Message} | Inner: {ex.InnerException?.Message}");
+                MessageBox.Show($"Error al grabar auditoría: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

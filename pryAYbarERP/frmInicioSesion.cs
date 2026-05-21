@@ -34,7 +34,7 @@ namespace pryAYbarERP
             else
             {
                 MessageBox.Show(mensaje, "Acceso denegado", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Conexionbd.GrabarAuditoriaSesion(usuario, mensaje);
+                Conexionbd.GrabarAuditoriaSesion(usuario);
             }
         }
 
