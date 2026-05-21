@@ -45,12 +45,5 @@ namespace pryAYbarERP
             else
                 txtContrasena.PasswordChar = '•';
         }
-
-        private void lnkRegistrarse_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            var frmRegistro = new frmRegistroUsuario(this);
-            frmRegistro.Show();
-            this.Hide();
-        }
     }
 }

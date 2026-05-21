@@ -144,5 +144,10 @@ namespace pryAYbarERP
         {
 
         }
+
+        private void cmbPerfil_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
