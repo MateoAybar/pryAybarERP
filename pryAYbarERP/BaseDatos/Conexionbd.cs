@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data.OleDb;
 using System.IO;
 using System.Data;
@@ -182,5 +182,101 @@ namespace pryAYbarERP.BaseDatos
                 MessageBox.Show($"Error al grabar auditoría: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        // Obtiene todos los perfiles registrados en la base de datos
+        public static DataTable ObtenerPerfiles(out string mensaje)
+        {
+            mensaje = string.Empty;
+            var dt = new DataTable();
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    string sql = "SELECT Id_Perfil, Nombre FROM Perfil ORDER BY Nombre ASC";
+                    using (var cmd = new OleDbCommand(sql, cn))
+                    {
+                        using (var adapter = new OleDbDataAdapter(cmd))
+                        {
+                            adapter.Fill(dt);
+                        }
+                    }
+                }
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error al obtener perfiles: {ex.Message}";
+                return null;
+            }
+        }
+
+        // Registra un nuevo usuario insertando sus datos básicos en Usuario,
+        // obteniendo el ID asignado, y creando la relación en [Relacion Us-Pe].
+        public static bool RegistrarUsuario(string nombre, string apellido, string mail, string contrasena, int idPerfil, out string mensaje)
+        {
+            mensaje = string.Empty;
+            OleDbTransaction transaction = null;
+            try
+            {
+                using (var cn = GetConnection())
+                {
+                    cn.Open();
+                    transaction = cn.BeginTransaction();
+
+                    // 1. Insertar en tabla Usuario
+                    string sqlUsuario = "INSERT INTO Usuario (Nombre, Apellido, Mail, Contraseña) VALUES (?, ?, ?, ?)";
+                    int nuevoIdUsuario = 0;
+                    using (var cmdUsuario = new OleDbCommand(sqlUsuario, cn, transaction))
+                    {
+                        cmdUsuario.Parameters.AddWithValue("?", nombre);
+                        cmdUsuario.Parameters.AddWithValue("?", apellido);
+                        cmdUsuario.Parameters.AddWithValue("?", mail);
+                        cmdUsuario.Parameters.AddWithValue("?", contrasena);
+
+                        cmdUsuario.ExecuteNonQuery();
+                    }
+
+                    // 2. Obtener el ID generado por el AutoNumérico (Identity)
+                    using (var cmdIdentity = new OleDbCommand("SELECT @@IDENTITY", cn, transaction))
+                    {
+                        object objId = cmdIdentity.ExecuteScalar();
+                        if (objId != null && objId != DBNull.Value)
+                        {
+                            nuevoIdUsuario = Convert.ToInt32(objId);
+                        }
+                    }
+
+                    if (nuevoIdUsuario <= 0)
+                    {
+                        throw new Exception("No se pudo obtener el ID del usuario insertado.");
+                    }
+
+                    // 3. Insertar relación en la tabla [Relacion Us-Pe]
+                    string sqlRelacion = "INSERT INTO [Relacion Us-Pe] (Id_Usuario, Id_Perfil) VALUES (?, ?)";
+                    using (var cmdRelacion = new OleDbCommand(sqlRelacion, cn, transaction))
+                    {
+                        cmdRelacion.Parameters.AddWithValue("?", nuevoIdUsuario.ToString());
+                        cmdRelacion.Parameters.AddWithValue("?", idPerfil.ToString());
+
+                        cmdRelacion.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                    mensaje = "Usuario registrado exitosamente.";
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (transaction != null)
+                {
+                    try { transaction.Rollback(); } catch { }
+                }
+                mensaje = $"Error al registrar usuario: {ex.Message}";
+                return false;
+            }
+        }
     }
 }
+

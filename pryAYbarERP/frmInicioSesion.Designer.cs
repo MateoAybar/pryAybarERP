@@ -1,4 +1,4 @@
-﻿namespace pryAYbarERP
+namespace pryAYbarERP
 {
     partial class frmInicioSesion
     {
@@ -36,6 +36,7 @@
             this.txtContrasena = new System.Windows.Forms.TextBox();
             this.chkMostrar = new System.Windows.Forms.CheckBox();
             this.btnIniciar = new System.Windows.Forms.Button();
+            this.lnkRegistrarse = new System.Windows.Forms.LinkLabel();
             this.lblInfo = new System.Windows.Forms.Label();
             this.panelMain.SuspendLayout();
             this.SuspendLayout();
@@ -51,10 +52,11 @@
             this.panelMain.Controls.Add(this.txtContrasena);
             this.panelMain.Controls.Add(this.chkMostrar);
             this.panelMain.Controls.Add(this.btnIniciar);
+            this.panelMain.Controls.Add(this.lnkRegistrarse);
             this.panelMain.Controls.Add(this.lblInfo);
             this.panelMain.Location = new System.Drawing.Point(12, 12);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(360, 240);
+            this.panelMain.Size = new System.Drawing.Size(360, 260);
             this.panelMain.TabIndex = 0;
             // 
             // lblTitle
@@ -130,12 +132,26 @@
             this.btnIniciar.UseVisualStyleBackColor = false;
             this.btnIniciar.Click += new System.EventHandler(this.btnIniciar_Click);
             // 
+            // 
+            // lnkRegistrarse
+            // 
+            this.lnkRegistrarse.AutoSize = true;
+            this.lnkRegistrarse.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lnkRegistrarse.LinkColor = System.Drawing.Color.DarkGreen;
+            this.lnkRegistrarse.Location = new System.Drawing.Point(22, 210);
+            this.lnkRegistrarse.Name = "lnkRegistrarse";
+            this.lnkRegistrarse.Size = new System.Drawing.Size(167, 15);
+            this.lnkRegistrarse.TabIndex = 8;
+            this.lnkRegistrarse.TabStop = true;
+            this.lnkRegistrarse.Text = "¿No tienes cuenta? Regístrate";
+            this.lnkRegistrarse.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkRegistrarse_LinkClicked);
+            // 
             // lblInfo
             // 
             this.lblInfo.AutoSize = true;
             this.lblInfo.Font = new System.Drawing.Font("Segoe UI", 8F);
             this.lblInfo.ForeColor = System.Drawing.Color.Gray;
-            this.lblInfo.Location = new System.Drawing.Point(22, 210);
+            this.lblInfo.Location = new System.Drawing.Point(22, 235);
             this.lblInfo.Name = "lblInfo";
             this.lblInfo.Size = new System.Drawing.Size(297, 13);
             this.lblInfo.TabIndex = 7;
@@ -146,7 +162,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.ClientSize = new System.Drawing.Size(384, 264);
+            this.ClientSize = new System.Drawing.Size(384, 284);
             this.Controls.Add(this.panelMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -170,6 +186,7 @@
         private System.Windows.Forms.TextBox txtContrasena;
         private System.Windows.Forms.CheckBox chkMostrar;
         private System.Windows.Forms.Button btnIniciar;
+        private System.Windows.Forms.LinkLabel lnkRegistrarse;
         private System.Windows.Forms.Label lblInfo;
     }
 }

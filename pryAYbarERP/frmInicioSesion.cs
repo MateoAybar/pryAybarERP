@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 using pryAYbarERP.BaseDatos;
 
@@ -44,6 +44,13 @@ namespace pryAYbarERP
                 txtContrasena.PasswordChar = '\0';
             else
                 txtContrasena.PasswordChar = '•';
+        }
+
+        private void lnkRegistrarse_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var frmRegistro = new frmRegistroUsuario(this);
+            frmRegistro.Show();
+            this.Hide();
         }
     }
 }
