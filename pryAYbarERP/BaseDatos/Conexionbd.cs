@@ -8,9 +8,6 @@ namespace pryAYbarERP.BaseDatos
 {
     internal class Conexionbd
     {
-        private static OleDbConnection cn;
-        private static object oleDbCommand;
-
         public static string ConnectionString { get; private set; }
 
         private static bool Conexion(out string mensaje)
@@ -297,7 +294,7 @@ namespace pryAYbarERP.BaseDatos
                 using (var cn = GetConnection())
                 {
                     cn.Open();
-                    string sql = "SELECT Id_Provincias, Provincias FROM Provincias ORDER BY Provincias ASC";
+                    string sql = "SELECT Id AS Id_Provincias, Provincias FROM Provincias ORDER BY Provincias ASC";
                     using (var cmd = new OleDbCommand(sql, cn))
                     {
                         using (var adapter = new OleDbDataAdapter(cmd))
@@ -325,10 +322,9 @@ namespace pryAYbarERP.BaseDatos
                 using (var cn = GetConnection())
                 {
                     cn.Open();
-                    string sql = "SELECT Id_Localidades, Localidades FROM Localidades WHERE Id_Provincias = ? ORDER BY Localidades ASC";
+                    string sql = "SELECT Id AS Id_Localidades, Localidad AS Localidades FROM Localidades ORDER BY Localidad ASC";
                     using (var cmd = new OleDbCommand(sql, cn))
                     {
-                        cmd.Parameters.AddWithValue("?", idProvincia);
                         using (var adapter = new OleDbDataAdapter(cmd))
                         {
                             adapter.Fill(dt);

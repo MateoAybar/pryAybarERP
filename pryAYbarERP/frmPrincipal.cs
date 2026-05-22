@@ -1,10 +1,10 @@
 using System;
 using System.Data;
-using System.Data.OleDb;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using pryAYbarERP.BaseDatos;
+using pryAYbarERP.Clases;
 
 namespace pryAYbarERP
 {
@@ -12,18 +12,15 @@ namespace pryAYbarERP
     {
         // Tabla temporal de domicilios para el registro
         private DataTable _dtDomiciliosTemp;
-        private OleDbConnection oleDbConnection;
-        private OleDbCommand cmdActualizarUsuario;
-        private readonly OleDbCommand oleDbCommand;
 
         public frmPrincipal()
         {
             InitializeComponent();
             _dtDomiciliosTemp = new DataTable();
             _dtDomiciliosTemp.Columns.Add("Direccion", typeof(string));
-            _dtDomiciliosTemp.Columns.Add("Id_Provincia", typeof(int));
+            _dtDomiciliosTemp.Columns.Add("Id_Provincias", typeof(int));
             _dtDomiciliosTemp.Columns.Add("Provincia", typeof(string));
-            _dtDomiciliosTemp.Columns.Add("Id_Localidad", typeof(int));
+            _dtDomiciliosTemp.Columns.Add("Id_Localidades", typeof(int));
             _dtDomiciliosTemp.Columns.Add("Localidad", typeof(string));
         }
 
@@ -33,7 +30,8 @@ namespace pryAYbarERP
         private void FrmPrincipal_Load(object sender, EventArgs e)
         {
             VerificarConexion();
-            CargarProvincias();
+            CargadorCombos.CargarProvincias(cmbProvinciaReg);
+            CargadorCombos.LimpiarLocalidades(cmbLocalidadReg);
             CargarPerfilesReg();
         }
 
@@ -105,19 +103,6 @@ namespace pryAYbarERP
             lblFechaConexionConn.Text = DateTime.Now.ToString("dd/MM/yyyy  HH:mm:ss");
         }
 
-        private void CargarProvincias()
-        {
-            string msg;
-            DataTable dt = Conexionbd.ObtenerProvincias(out msg);
-            if (dt != null)
-            {
-                cmbProvinciaReg.DataSource = dt;
-                cmbProvinciaReg.DisplayMember = "Nombre";
-                cmbProvinciaReg.ValueMember = "Id_Provincia";
-                cmbProvinciaReg.SelectedIndex = -1;
-            }
-        }
-
         private void CargarPerfilesReg()
         {
             string msg;
@@ -151,29 +136,18 @@ namespace pryAYbarERP
 
         private void cmbProvinciaReg_SelectedIndexChanged(object sender, EventArgs e)
         {
-            cmbLocalidadReg.DataSource = null;
-            cmbLocalidadReg.DisplayMember = "";
-            cmbLocalidadReg.ValueMember = "";
+            CargadorCombos.LimpiarLocalidades(cmbLocalidadReg);
+
+            if (!CargadorCombos.EsCordoba(cmbProvinciaReg))
+            {
+                return;
+            }
             
-            if (cmbProvinciaReg.SelectedValue == null) return;
+            int idProv = CargadorCombos.ObtenerIdSeleccionado(cmbProvinciaReg);
+            if (idProv == 0) return;
 
-            // Restaurar bindings de cmbProvinciaReg en caso de que se hayan perdido
-            if (string.IsNullOrEmpty(cmbProvinciaReg.ValueMember))
-            {
-                cmbProvinciaReg.DisplayMember = "Nombre";
-                cmbProvinciaReg.ValueMember = "Id_Provincia";
-            }
-
-            int idProv = Convert.ToInt32(cmbProvinciaReg.SelectedValue);
-            string msg;
-            DataTable dt = Conexionbd.ObtenerLocalidades(idProv, out msg);
-            if (dt != null && dt.Rows.Count > 0)
-            {
-                cmbLocalidadReg.DataSource = dt;
-                cmbLocalidadReg.DisplayMember = "Nombre";
-                cmbLocalidadReg.ValueMember = "Id_Localidad";
-                cmbLocalidadReg.SelectedIndex = -1;
-            }
+            cmbLocalidadReg.Enabled = true;
+            CargadorCombos.CargarLocalidades(cmbLocalidadReg, idProv);
         }
 
         private void chkMostrarReg_CheckedChanged(object sender, EventArgs e)
@@ -228,9 +202,9 @@ namespace pryAYbarERP
 
             DataRow nr = _dtDomiciliosTemp.NewRow();
             nr["Direccion"] = dir;
-            nr["Id_Provincia"] = idProv;
-            nr["Provincia"] = nomProv;
-            nr["Id_Localidad"] = idLoc;
+            nr["Id_Provincias"] = idProv;
+            nr["Provincias"] = nomProv;
+            nr["Id_Localidades"] = idLoc;
             nr["Localidad"] = nomLoc;
             _dtDomiciliosTemp.Rows.Add(nr);
 
@@ -248,9 +222,9 @@ namespace pryAYbarERP
             {
                 dgvDomiciliosReg.Rows.Add(
                     r["Direccion"],
-                    r["Id_Provincia"],
-                    r["Provincia"],
-                    r["Id_Localidad"],
+                    r["Id_Provincias"],
+                    r["Provincias"],
+                    r["Id_Localidades"],
                     r["Localidad"]
                 );
             }
@@ -334,9 +308,7 @@ namespace pryAYbarERP
             cmbPerfilReg.SelectedIndex = -1;
             cmbRedSocialReg.SelectedIndex = 0;
             cmbProvinciaReg.SelectedIndex = -1;
-            cmbLocalidadReg.DataSource = null;
-            cmbLocalidadReg.DisplayMember = "";
-            cmbLocalidadReg.ValueMember = "";
+            CargadorCombos.LimpiarLocalidades(cmbLocalidadReg);
             chkMostrarReg.Checked = false;
             _dtDomiciliosTemp.Clear();
             dgvDomiciliosReg.Rows.Clear();
