@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Forms;
 using pryAYbarERP.BaseDatos;
+using pryAYbarERP.Clases;
 
 namespace pryAYbarERP
 {
@@ -9,6 +10,7 @@ namespace pryAYbarERP
         public frmInicioSesion()
         {
             InitializeComponent();
+            EstilosFormularios.Aplicar(this);
         }
 
         private void btnIniciar_Click(object sender, EventArgs e)
@@ -27,14 +29,15 @@ namespace pryAYbarERP
 
             if (ok)
             {
+                Conexionbd.GrabarAuditoriaSesion(usuario, mensaje);
                 var frm = new frmPrincipal();
                 frm.Show();
                 this.Hide();
             }
             else
             {
+                Conexionbd.GrabarAuditoriaSesion(usuario, mensaje);
                 MessageBox.Show(mensaje, "Acceso denegado", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Conexionbd.GrabarAuditoriaSesion(usuario);
             }
         }
 

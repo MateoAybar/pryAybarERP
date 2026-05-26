@@ -33,17 +33,53 @@ namespace pryAYbarERP.Clases
             combo.SelectedIndex = -1;
         }
 
+        public static bool CargarPerfiles(ComboBox combo, out string mensaje)
+        {
+            DataTable tabla = Conexionbd.ObtenerPerfiles(out mensaje);
+            if (tabla == null)
+            {
+                combo.DataSource = null;
+                return false;
+            }
+
+            if (!tabla.Columns.Contains("Nombre") || !tabla.Columns.Contains("Id_Perfil"))
+            {
+                combo.DataSource = null;
+                mensaje = "Esquema de Perfil inesperado: faltan columnas Nombre o Id_Perfil.";
+                return false;
+            }
+
+            combo.DataSource = tabla;
+            combo.DisplayMember = "Nombre";
+            combo.ValueMember = "Id_Perfil";
+            combo.SelectedIndex = -1;
+            return true;
+        }
+
+        public static bool CargarUsuarios(ComboBox combo, out string mensaje)
+        {
+            DataTable tabla = Conexionbd.ObtenerUsuariosCompleto(out mensaje);
+            combo.DataSource = null;
+
+            if (tabla == null)
+                return false;
+
+            if (tabla.Rows.Count == 0)
+                return true;
+
+            combo.DataSource = tabla;
+            combo.DisplayMember = "NombreCompleto";
+            combo.ValueMember = "Id_Usuario";
+            combo.SelectedIndex = -1;
+            return true;
+        }
+
         public static void LimpiarLocalidades(ComboBox combo)
         {
             combo.DataSource = null;
             combo.DisplayMember = "";
             combo.ValueMember = "";
             combo.Enabled = false;
-        }
-
-        public static bool EsCordoba(ComboBox combo)
-        {
-            return combo.Text.ToLower().Contains("rdoba");
         }
 
         private static void PrepararTablaCombo(DataTable tabla, string columnaId, string columnaTexto)
