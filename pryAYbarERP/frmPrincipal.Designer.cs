@@ -1108,10 +1108,8 @@ namespace pryAYbarERP
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(242)))), ((int)(((byte)(245)))));
-            this.ClientSize = new System.Drawing.Size(980, 712);
+            this.ClientSize = new System.Drawing.Size(980, 690);
             this.Controls.Add(this.tcMenu);
-            this.Controls.Add(this.lblConexion);
-            this.Controls.Add(this.stEstadoConexion);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.Name = "frmPrincipal";

@@ -14,8 +14,19 @@ namespace pryAYbarERP
         // Tabla temporal de domicilios para el registro
         private DataTable _dtDomiciliosTemp;
         private TextBox txtDomicilioEdit;
+        private TextBox txtDniEdit;
         private Button btnGoogleMapsEdit;
+        private Button btnBajaUsuarioEdit;
+        private Button btnSalirSistema;
+        private Panel pnlInfoUsuarioEdit;
+        private Label lblInfoNombreEdit;
+        private Label lblInfoEstadoEdit;
+        private Label lblInfoDniEdit;
+        private Label lblInfoMailEdit;
+        private Label lblInfoTelefonoEdit;
+        private Label lblInfoDomicilioEdit;
         private Label lblDomicilioEdit;
+        private Label lblDniEdit;
         private Label lblPerfilAccesoEdit;
         private ComboBox cmbPerfilEdit;
 
@@ -23,6 +34,7 @@ namespace pryAYbarERP
         {
             InitializeComponent();
             CrearControlesEdicionAdicionales();
+            CrearBotonSalir();
             EstilosFormularios.Aplicar(this);
             _dtDomiciliosTemp = DomiciliosTemporales.CrearTabla();
         }
@@ -50,21 +62,11 @@ namespace pryAYbarERP
 
             if (conectado)
             {
-                BarraDeEstado.Value = 100;
-                tsslEstado.Text = "Base de Datos:";
-                lblConexion.Text = "Conectado";
-                lblConexion.ForeColor = System.Drawing.Color.LimeGreen;
-
                 // Datos para Tab Conexión
                 ActualizarPanelConexion(true, mensaje);
             }
             else
             {
-                BarraDeEstado.Value = 0;
-                tsslEstado.Text = "Base de Datos:";
-                lblConexion.Text = "Sin conexion";
-                lblConexion.ForeColor = System.Drawing.Color.OrangeRed;
-
                 ActualizarPanelConexion(false, mensaje);
             }
         }
@@ -124,9 +126,28 @@ namespace pryAYbarERP
 
         private void CrearControlesEdicionAdicionales()
         {
-            gpbDatosEdit.Height = 400;
-            btnGuardarEdit.Location = new Point(760, 528);
+            gpbDatosEdit.Location = new Point(10, 250);
+            gpbDatosEdit.Height = 275;
+            btnGuardarEdit.Location = new Point(760, 545);
             btnGuardarEdit.Size = new Size(180, 42);
+
+            CrearTarjetaInformacionUsuario();
+
+            lblDniEdit = new Label
+            {
+                Name = "lblDniEdit",
+                Text = "DNI:",
+                AutoSize = true,
+                Location = new Point(650, 83)
+            };
+
+            txtDniEdit = new TextBox
+            {
+                Name = "txtDniEdit",
+                Location = new Point(650, 101),
+                MaxLength = 8,
+                Size = new Size(270, 24)
+            };
 
             lblPerfilAccesoEdit = new Label
             {
@@ -148,36 +169,116 @@ namespace pryAYbarERP
             lblDomicilioEdit = new Label
             {
                 Name = "lblDomicilioEdit",
-                Text = "Domicilio:",
+                Text = "Domicilio / domicilios:",
                 AutoSize = true,
-                Location = new Point(10, 210)
+                Location = new Point(10, 190)
             };
 
             txtDomicilioEdit = new TextBox
             {
                 Name = "txtDomicilioEdit",
-                Location = new Point(10, 228),
-                Size = new Size(740, 24)
+                Location = new Point(10, 208),
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                Size = new Size(740, 48)
             };
 
             btnGoogleMapsEdit = new Button
             {
                 Name = "btnGoogleMapsEdit",
                 Text = "MAPS",
-                Location = new Point(770, 224),
+                Location = new Point(770, 216),
                 Size = new Size(150, 32)
             };
             btnGoogleMapsEdit.Click += btnGoogleMapsEdit_Click;
 
-            chkActivoEdit.Location = new Point(10, 285);
-            lblNotaEdit.Location = new Point(10, 325);
+            chkActivoEdit.Location = new Point(650, 160);
+            chkActivoEdit.Text = "Usuario Activo";
+            lblNotaEdit.Location = new Point(10, 260);
             lblNotaEdit.Size = new Size(880, 30);
+            lblNotaEdit.Text = "El boton Dar de baja deja al usuario inactivo. Para reactivarlo, marque Usuario Activo y guarde los cambios.";
 
+            btnBajaUsuarioEdit = new Button
+            {
+                Name = "btnBajaUsuarioEdit",
+                Text = "DAR DE BAJA",
+                Location = new Point(590, 545),
+                Size = new Size(150, 42)
+            };
+            btnBajaUsuarioEdit.Click += btnBajaUsuarioEdit_Click;
+
+            gpbDatosEdit.Controls.Add(lblDniEdit);
+            gpbDatosEdit.Controls.Add(txtDniEdit);
             gpbDatosEdit.Controls.Add(lblPerfilAccesoEdit);
             gpbDatosEdit.Controls.Add(cmbPerfilEdit);
             gpbDatosEdit.Controls.Add(lblDomicilioEdit);
             gpbDatosEdit.Controls.Add(txtDomicilioEdit);
             gpbDatosEdit.Controls.Add(btnGoogleMapsEdit);
+            tpEditar.Controls.Add(pnlInfoUsuarioEdit);
+            tpEditar.Controls.Add(btnBajaUsuarioEdit);
+        }
+
+        private void CrearTarjetaInformacionUsuario()
+        {
+            pnlInfoUsuarioEdit = new Panel
+            {
+                Name = "pnlInfoUsuarioEdit",
+                BackColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle,
+                Location = new Point(10, 105),
+                Size = new Size(930, 135)
+            };
+
+            Label lblTitulo = new Label
+            {
+                Text = "Informacion del usuario",
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(30, 58, 138),
+                Location = new Point(14, 10),
+                Size = new Size(250, 22)
+            };
+
+            lblInfoNombreEdit = CrearEtiquetaInfo("Seleccione un usuario", 14, 36, 420, 26, 12F, true);
+            lblInfoEstadoEdit = CrearEtiquetaInfo("", 770, 14, 130, 26, 9.5F, true);
+            lblInfoDniEdit = CrearEtiquetaInfo("DNI: -", 14, 70, 220, 22, 9.5F, false);
+            lblInfoMailEdit = CrearEtiquetaInfo("Mail: -", 245, 70, 360, 22, 9.5F, false);
+            lblInfoTelefonoEdit = CrearEtiquetaInfo("Telefono: -", 620, 70, 280, 22, 9.5F, false);
+            lblInfoDomicilioEdit = CrearEtiquetaInfo("Domicilio: -", 14, 100, 886, 28, 9.5F, false);
+
+            pnlInfoUsuarioEdit.Controls.Add(lblTitulo);
+            pnlInfoUsuarioEdit.Controls.Add(lblInfoNombreEdit);
+            pnlInfoUsuarioEdit.Controls.Add(lblInfoEstadoEdit);
+            pnlInfoUsuarioEdit.Controls.Add(lblInfoDniEdit);
+            pnlInfoUsuarioEdit.Controls.Add(lblInfoMailEdit);
+            pnlInfoUsuarioEdit.Controls.Add(lblInfoTelefonoEdit);
+            pnlInfoUsuarioEdit.Controls.Add(lblInfoDomicilioEdit);
+        }
+
+        private Label CrearEtiquetaInfo(string texto, int x, int y, int ancho, int alto, float tamano, bool negrita)
+        {
+            return new Label
+            {
+                Text = texto,
+                AutoSize = false,
+                Font = new Font("Segoe UI", tamano, negrita ? FontStyle.Bold : FontStyle.Regular),
+                ForeColor = Color.FromArgb(31, 41, 55),
+                Location = new Point(x, y),
+                Size = new Size(ancho, alto)
+            };
+        }
+
+        private void CrearBotonSalir()
+        {
+            btnSalirSistema = new Button
+            {
+                Name = "btnSalirSistema",
+                Text = "SALIR",
+                Location = new Point(850, 12),
+                Size = new Size(90, 28)
+            };
+            btnSalirSistema.Click += btnSalirSistema_Click;
+            Controls.Add(btnSalirSistema);
+            btnSalirSistema.BringToFront();
         }
 
         // ====================================================================
@@ -341,7 +442,11 @@ namespace pryAYbarERP
         private void cmbSelUsrEdit_SelectedIndexChanged(object sender, EventArgs e)
         {
             int idUsuario;
-            if (!ObtenerIdUsuarioSeleccionado(cmbSelUsrEdit, out idUsuario)) return;
+            if (!ObtenerIdUsuarioSeleccionado(cmbSelUsrEdit, out idUsuario))
+            {
+                LimpiarTarjetaInformacionUsuario();
+                return;
+            }
 
             CargarDatosUsuarioEnEdit(idUsuario);
         }
@@ -360,9 +465,11 @@ namespace pryAYbarERP
             txtNombreEdit.Text = row["Nombre"]?.ToString() ?? "";
             txtApellidoEdit.Text = row["Apellido"]?.ToString() ?? "";
             txtMailEdit.Text = row["Mail"]?.ToString() ?? "";
+            txtDniEdit.Text = row["DNI"]?.ToString() ?? "";
             txtContrasenaEdit.Clear();
             txtTelefonoEdit.Text = row["Telefono"]?.ToString() ?? "";
-            txtDomicilioEdit.Text = row["Domicilio"]?.ToString() ?? "";
+            string domicilio = row.IsNull("Domicilio") ? "" : row["Domicilio"].ToString();
+            txtDomicilioEdit.Text = domicilio;
 
             // Parsear red social: "Facebook|usuario"
             string redesRaw = row["RedesSociales"]?.ToString() ?? "";
@@ -386,6 +493,45 @@ namespace pryAYbarERP
             int idPerfil = Conexionbd.ObtenerPerfilUsuario(idUsuario, out msgPerfil);
             if (idPerfil > 0)
                 cmbPerfilEdit.SelectedValue = idPerfil;
+
+            MostrarInformacionUsuario(row, domicilio);
+        }
+
+        private void MostrarInformacionUsuario(DataRow row, string domicilio)
+        {
+            string nombreCompleto = (ObtenerTexto(row, "Nombre") + " " + ObtenerTexto(row, "Apellido")).Trim();
+            string estado = ValidadorUsuarios.EstaActivo(row["Activo"]) ? "Activo" : "Dado de baja";
+            string domicilioVisible = string.IsNullOrWhiteSpace(domicilio) ? "Sin domicilio cargado" : domicilio.Trim();
+
+            lblInfoNombreEdit.Text = string.IsNullOrWhiteSpace(nombreCompleto) ? "Usuario sin nombre" : nombreCompleto;
+            lblInfoEstadoEdit.Text = estado;
+            lblInfoEstadoEdit.ForeColor = estado == "Activo"
+                ? Color.FromArgb(22, 101, 52)
+                : Color.FromArgb(185, 28, 28);
+            lblInfoDniEdit.Text = "DNI: " + ObtenerTexto(row, "DNI");
+            lblInfoMailEdit.Text = "Mail: " + ObtenerTexto(row, "Mail");
+            lblInfoTelefonoEdit.Text = "Telefono: " + ObtenerTexto(row, "Telefono");
+            lblInfoDomicilioEdit.Text = "Domicilio: " + NormalizarDomicilioParaTarjeta(domicilioVisible);
+        }
+
+        private void LimpiarTarjetaInformacionUsuario()
+        {
+            lblInfoNombreEdit.Text = "Seleccione un usuario";
+            lblInfoEstadoEdit.Text = "";
+            lblInfoDniEdit.Text = "DNI: -";
+            lblInfoMailEdit.Text = "Mail: -";
+            lblInfoTelefonoEdit.Text = "Telefono: -";
+            lblInfoDomicilioEdit.Text = "Domicilio: -";
+        }
+
+        private string NormalizarDomicilioParaTarjeta(string domicilio)
+        {
+            return domicilio.Replace(Environment.NewLine, " | ").Replace("\n", " | ").Replace("\r", " | ");
+        }
+
+        private string ObtenerTexto(DataRow row, string columna)
+        {
+            return row.IsNull(columna) ? "" : row[columna].ToString();
         }
 
         private void chkMostrarEdit_CheckedChanged(object sender, EventArgs e)
@@ -405,6 +551,7 @@ namespace pryAYbarERP
             string nombre = txtNombreEdit.Text.Trim();
             string apellido = txtApellidoEdit.Text.Trim();
             string mail = txtMailEdit.Text.Trim();
+            string dni = txtDniEdit.Text.Trim();
             string nuevaContrasena = txtContrasenaEdit.Text;
             string telefono = txtTelefonoEdit.Text.Trim();
             string domicilio = txtDomicilioEdit.Text.Trim();
@@ -413,7 +560,7 @@ namespace pryAYbarERP
             bool activo = chkActivoEdit.Checked;
 
             string aviso;
-            if (!ValidadorUsuarios.ValidarEdicion(nombre, apellido, mail, out aviso))
+            if (!ValidadorUsuarios.ValidarEdicion(dni, nombre, apellido, mail, out aviso))
             {
                 MsgWarn(aviso);
                 return;
@@ -429,7 +576,7 @@ namespace pryAYbarERP
             string redesSociales = ValidadorUsuarios.ArmarRedSocial(tipoRed, handle);
 
             string msg;
-            bool ok = Conexionbd.EditarUsuario(idUsuario, nombre, apellido, mail, nuevaContrasena,
+            bool ok = Conexionbd.EditarUsuario(idUsuario, dni, nombre, apellido, mail, nuevaContrasena,
                 telefono, redesSociales, domicilio, activo, idPerfil, out msg);
 
             if (ok)
@@ -461,6 +608,38 @@ namespace pryAYbarERP
             });
         }
 
+        private void btnBajaUsuarioEdit_Click(object sender, EventArgs e)
+        {
+            int idUsuario;
+            if (!ObtenerIdUsuarioSeleccionado(cmbSelUsrEdit, out idUsuario))
+            {
+                MsgWarn("Seleccione un usuario para dar de baja.");
+                return;
+            }
+
+            DialogResult respuesta = MessageBox.Show(
+                "Desea dar de baja al usuario seleccionado?",
+                "Confirmar baja",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (respuesta != DialogResult.Yes)
+                return;
+
+            string msg;
+            if (Conexionbd.DarDeBajaUsuario(idUsuario, out msg))
+            {
+                chkActivoEdit.Checked = false;
+                MessageBox.Show("Usuario dado de baja correctamente.", "Baja realizada",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                CargarUsuariosEnCombo(cmbSelUsrEdit);
+            }
+            else
+            {
+                MessageBox.Show(msg, "Error al dar de baja", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         // ====================================================================
         //  TAB 3 – GESTIÓN DE ESTADO (DAR DE BAJA / ACTIVAR)
         // ====================================================================
@@ -487,6 +666,11 @@ namespace pryAYbarERP
 
         private void stEstadoConexion_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
+        }
+
+        private void btnSalirSistema_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
 
         // ====================================================================

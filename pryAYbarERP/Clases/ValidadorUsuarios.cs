@@ -33,9 +33,15 @@ namespace pryAYbarERP.Clases
             return true;
         }
 
-        public static bool ValidarEdicion(string nombre, string apellido, string mail, out string mensaje)
+        public static bool ValidarEdicion(string dni, string nombre, string apellido, string mail, out string mensaje)
         {
             mensaje = "";
+
+            if (string.IsNullOrWhiteSpace(dni))
+                return Error("Ingrese el DNI.", out mensaje);
+
+            if (!Regex.IsMatch(dni, @"^\d{7,8}$"))
+                return Error("El DNI debe tener 7 u 8 digitos numericos.", out mensaje);
 
             if (string.IsNullOrWhiteSpace(nombre))
                 return Error("Ingrese el Nombre.", out mensaje);

@@ -215,7 +215,7 @@ namespace pryAYbarERP.BaseDatos
 
         public static DataRow ObtenerDatosUsuario(int idUsuario, out string mensaje)
         {
-            string sql = @"SELECT Id_Usuario, Nombre, Apellido, Mail, Telefono, RedesSociales, Activo, Domicilio
+            string sql = @"SELECT Id_Usuario, DNI, Nombre, Apellido, Mail, Telefono, RedesSociales, Activo, Domicilio
                            FROM Usuario
                            WHERE Id_Usuario = ?";
 
@@ -310,11 +310,11 @@ namespace pryAYbarERP.BaseDatos
             }
         }
 
-        private static bool ExisteValor(OleDbConnection cn, OleDbTransaction tx, string sql, object valor)
+        private static bool ExisteValor(OleDbConnection cn, OleDbTransaction tx, string sql, params object[] valores)
         {
             using (OleDbCommand cmd = new OleDbCommand(sql, cn, tx))
             {
-                AgregarParametros(cmd, valor);
+                AgregarParametros(cmd, valores);
                 return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
             }
         }
@@ -362,7 +362,7 @@ namespace pryAYbarERP.BaseDatos
             return texto.Trim();
         }
 
-        public static bool EditarUsuario(int idUsuario, string nombre, string apellido,
+        public static bool EditarUsuario(int idUsuario, string dni, string nombre, string apellido,
             string mail, string nuevaContrasena, string telefono,
             string redesSociales, string domicilio, bool activo, int idPerfil, out string mensaje)
         {
@@ -376,7 +376,13 @@ namespace pryAYbarERP.BaseDatos
                     cn.Open();
                     tx = cn.BeginTransaction();
 
-                    ActualizarUsuario(cn, tx, idUsuario, nombre, apellido, mail,
+                    if (ExisteValor(cn, tx, "SELECT COUNT(*) FROM Usuario WHERE Mail = ? AND Id_Usuario <> ?", mail, idUsuario))
+                        throw new Exception("Ya existe otro usuario con ese correo.");
+
+                    if (ExisteValor(cn, tx, "SELECT COUNT(*) FROM Usuario WHERE DNI = ? AND Id_Usuario <> ?", dni, idUsuario))
+                        throw new Exception("Ya existe otra persona con ese DNI.");
+
+                    ActualizarUsuario(cn, tx, idUsuario, dni, nombre, apellido, mail,
                         nuevaContrasena, telefono, redesSociales, domicilio, activo);
                     ActualizarPerfilUsuario(cn, tx, idUsuario, idPerfil);
                     tx.Commit();
@@ -397,18 +403,48 @@ namespace pryAYbarERP.BaseDatos
             }
         }
 
+        public static bool DarDeBajaUsuario(int idUsuario, out string mensaje)
+        {
+            mensaje = "";
+
+            try
+            {
+                using (OleDbConnection cn = GetConnection())
+                using (OleDbCommand cmd = new OleDbCommand("UPDATE Usuario SET Activo = ? WHERE Id_Usuario = ?", cn))
+                {
+                    cn.Open();
+                    AgregarParametros(cmd, "No", idUsuario);
+                    int filas = cmd.ExecuteNonQuery();
+
+                    if (filas == 0)
+                    {
+                        mensaje = "No se encontro el usuario seleccionado.";
+                        return false;
+                    }
+                }
+
+                mensaje = "Usuario dado de baja correctamente.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Error al dar de baja usuario: " + ex.Message;
+                return false;
+            }
+        }
+
         private static void ActualizarUsuario(OleDbConnection cn, OleDbTransaction tx, int idUsuario,
-            string nombre, string apellido, string mail, string nuevaContrasena,
+            string dni, string nombre, string apellido, string mail, string nuevaContrasena,
             string telefono, string redesSociales, string domicilio, bool activo)
         {
-            string sql = "UPDATE Usuario SET Nombre = ?, Apellido = ?, Mail = ?, Telefono = ?, RedesSociales = ?, Domicilio = ?, Activo = ?";
+            string sql = "UPDATE Usuario SET DNI = ?, Nombre = ?, Apellido = ?, Mail = ?, Telefono = ?, RedesSociales = ?, Domicilio = ?, Activo = ?";
             if (!string.IsNullOrWhiteSpace(nuevaContrasena))
                 sql += ", [Contraseña] = ?";
             sql += " WHERE Id_Usuario = ?";
 
             using (OleDbCommand cmd = new OleDbCommand(sql, cn, tx))
             {
-                AgregarParametros(cmd, nombre, apellido, mail, telefono, redesSociales, domicilio, activo ? "Si" : "No");
+                AgregarParametros(cmd, dni, nombre, apellido, mail, telefono, redesSociales, domicilio, activo ? "Si" : "No");
                 if (!string.IsNullOrWhiteSpace(nuevaContrasena))
                     AgregarParametros(cmd, nuevaContrasena);
                 AgregarParametros(cmd, idUsuario);
